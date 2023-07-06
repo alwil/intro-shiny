@@ -1,0 +1,20 @@
+"0","quit"
+"2","Warning messages:
+"
+"2","1: No Python documentation found for 'stat_smooth'. 
+"
+"2","2: No Python documentation found for 'stat_smooth'. 
+"
+"2","3: No Python documentation found for 'stat_smooth'. 
+"
+"2","4: No Python documentation found for 'stat_smooth'. 
+"
+"0","#| include: false"
+"0","#| echo: false"
+"0",""
+"0","knitr::opts_chunk$set("
+"0","	echo = TRUE,"
+"0","	eval = FALSE,"
+"0","	message = FALSE,"
+"0","	warning = FALSE"
+"0",")"

@@ -1,0 +1,14 @@
+name: intro_shiny
+title: intro_shiny
+username:
+account: tudelft-rcafe
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 9192779
+bundleId: 7291100
+url: https://tudelft-rcafe.shinyapps.io/intro_shiny/
+when: 1685613197.48459
+lastSyncTime: 1685613197.4846
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: custom.scss|error.png|img/architecture_peng.jpg|img/background.png|img/error.png|img/logo.png|img/logo_rectangular.png|RCafe_shiny_notes.html|RCafe_shiny_notes.qmd|README.md|slides.html|slides.qmd|slides_files

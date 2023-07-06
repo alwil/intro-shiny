@@ -1,0 +1,966 @@
+---
+title: "Notes for Shiny Coding Session"
+format: 
+  html:
+    embed-resources: true
+    self-contained: true
+   
+---
+
+```{r setup}
+#| include: false
+#| echo: false
+
+knitr::opts_chunk$set(
+	echo = TRUE,
+	eval = FALSE,
+	message = FALSE,
+	warning = FALSE
+)
+```
+
+# What is Shiny? 
+Shiny is a framework for building interactive Web Apps, available in `R` and  as of recently in `Python`. Shiny has a high-level structure, which makes it relatively easy to learn and use, compared to other frameworks. It is based on reactive programming model
+
+It works with many popular data vis libraries. In R (probably also soon in Python), R has an abundance of extensions, packages that make it even more powerful.
+
+
+# Why Shiny?
+- Tool to easily explore data
+- An extension of a research paper
+- Can be used as a simple tool for WebApps
+- ...
+
+# Some Examples of Shiny apps used in Research
+
+## Python 
+* [Respiratory Diseases App](https://gallery.shinyapps.io/respiratory_disease_pyshiny/)
+* [Air mass calculator](https://gallery.shinyapps.io/airmass/)
+* [Orbit simulation](https://shinylive.io/py/app/#orbit-simulation)
+
+
+## R
+* [ICGC Pancreatic Cancer Genome Viewer](https://gallery.shinyapps.io/genome_browser/)
+* [Shiny MRI](https://haozhu233.shinyapps.io/shinyMRI-contest/)
+* [GraphBIO](http://www.graphbio1.com/en/) - allows file upload
+* [Fossil Fuel Non-Proliferation Tracker](https://fossilfueltracker.org/app/ffnpt)
+* [WHO Health Equity Assessment Toolkit](https://whoequity.shinyapps.io/heat/#)
+* [Interim Bias  Simulations](https://app.axiaal.com/Blinded_interim_simulations/) - collects user input
+* [Alaska Board of Fisheries Proposals](https://sasap-data.shinyapps.io/board_of_fisheries/)
+
+
+
+# Installation
+
+## Python 
+
+You can retrieve the the `shiny` package either from `pip` or `conda.` Let's follow steps to retrieve it from conda. ( you can follow steps for pip [here](https://shiny.posit.co/py/docs/install.html)). We will also use the `plotnine` package. 
+
+```
+mkdir shiny-demo
+cd shiny-demo
+
+conda create --name shinydemo-env
+
+conda activate shinydemo-env
+
+conda install -c conda-forge shiny
+conda install -c conda-forge plotnine
+conda install Jinja2
+
+
+```
+
+If we have time we will need:
+
+```
+pip install --user shinywidgets
+pip install --user plotly
+```
+
+If there's an issue with installation, you can try :
+
+```
+conda update -c conda-forge shiny
+
+```
+
+
+## R
+
+Let's create an R Studio project  and install packages:
+
+```{r install-packages}
+#| eval: false
+ 
+ usethis::create_project(path = "shiny-demo", open = TRUE, rstudio = TRUE)
+
+ install.packages("shiny")
+```
+
+
+# App structure
+
+The Shiny App is divided into two parts:  user interface (**ui**) and **server**. 
+
+## Python
+
+In Python both of those components are defined in the `app.py` file. 
+
+
+## R 
+These two components can be saved in a project separately as `ui.R` and `server.R` or in a single script in `app.R`. Our app is not going to be very extensive, so we can keep it in a single file, but if you're working on a bigger project, it might be a good idea to separate it. If your working on a very big projects, there are ways to compartmentalize your work further (i.e. Shiny modules), but we're not going to delve into that today. 
+
+
+![Illustration: Vivian Peng](img/architecture_peng.jpg)
+
+## `ui`
+
+`ui` (user interface) is where you define how your app will look like. You specify elements of the layout and define where different elements (e.g. tables, graphs, filters) will be placed.
+
+`ui` is an object, created by the `fluidPage()`  ( or `ui.page_fluid()`) function. Each element of the `ui` is an argument of the `fluidPage()` function, so they need to be separated by **comas**. 
+
+## `server` 
+
+`server` is where you run your r code, e.g. define your graphs, adapt your datasets, etc. The results of what you create in the server will be passed to the `ui` (more on this later). 
+
+`server` *is* a function with two (or three) arguments: `input`, `output` (and `session`). We will leave out `session` argument for now, and focus on `input` and `output` in a minute. 
+
+As `server` is a function and it uses curly brackets (or indentation), each new command is separated by a new line. 
+
+
+# Create a simple app
+
+## Python 
+
+In the directory that you've created, create a file `app.py`. In the file you need to do a few things:
+
+* import needed modules from `shiny` package : `ui`, `render`, `App`.
+* add `ui` and `server`
+* create and shiny.App object named `app`
+
+
+```{python simple-app}
+
+from shiny import App, ui, render, reactive 
+from plotnine import ggplot, aes, geom_point, geom_smooth, theme 
+
+
+# Part 1: ui ----
+app_ui = ui.page_fluid()
+
+# Part 2: server ----
+def server(input, output, session):
+  ...
+
+# Combine into a shiny app.
+# Note that the variable must be "app".
+app = App(app_ui, server)
+
+```
+
+Shiny framework helps you with this (you can run in Shell `shiny create .` in your working directory), but it is good to type everything by hand the first time.
+
+## R 
+
+First, let's create a simple app. You can create it in your working directory (the folder you're working in now), or preferably you create a new project for this. In the new project, you create an empty R script and save it as `app.R`.
+
+First, let's include  the packages you'll be using in the script: 
+
+
+```{r load-packages}
+# Load libraries ---- 
+
+library(shiny)
+library(tidyverse)
+```
+
+Now, let's define the `ui` and `server`:
+
+```{r define-app}
+
+ui <- fluidPage()
+
+server <- function(input, output){}
+```
+
+Finally, we need to add a command that tells R to run the app using the `ui` and `server` components:
+ 
+```{r run-app}
+shinyApp(ui = ui, server = server)
+```
+ 
+
+# Running the app 
+
+Time to run the app!
+
+
+## Python
+
+To run the app in Python, you write in Shell:
+ 
+```
+shiny run --reload <path to the app>
+```
+
+If you're using VS code, you can also install the [Shiny for Python extension](https://marketplace.visualstudio.com/items?itemName=posit.shiny-python), that provides the interface within VS code to run/ debug shiny apps. We won't do it now. 
+
+
+## R 
+
+To run Shiny App in R, you can use the `shiny::runApp()` function in the console, pointing to the directory in which the app is stored:
+
+```{r launch-app}
+shiny::runApp('shiny-demo')
+```
+
+
+For RStudio users, the you can make use of the Run button, that in case of Shiny Apps, runs the application in your browser.
+
+::: {.callout-note}
+It's normal that the apps are empty. We have not defined any content yet!
+:::
+
+
+
+# `diamonds` dataset
+
+In this demo session, we will focus on the `diamonds` dataset. This dataset is widely used in the R tutorials (specifically for data visualisation), and is also available in Python.
+
+## Python
+
+ The diamonds dataset is available in the `plotnine` library. In order to load it, we need to import the library
+ 
+```{python import-data}
+from plotnine.data import diamonds
+
+```
+ 
+## R 
+ `diamonds` dataset is available with `ggplot2` library. If you have the packages we need loaded you should be able to see the dataset. You're free to work on your own data if you prefer. You can run this in the console: 
+
+```{r view-data}
+View(diamonds)
+str(diamonds)
+```
+
+There's a useful documentation in the help pages that you can access with a question mark:
+```{r data-help}
+#| eval: false
+?diamonds
+```
+
+
+# `input` and `output`
+ Let's talk more about inputs and outputs. These are the key elements of a Shiny App. Thanks to them the `ui` and `server` can communicate. In practical terms `input` and `output` 
+ - **R**: are named lists (i.e. list in which each of elements has a name)
+ - **Python** input/output objects 
+ 
+ - `input`
+   + every interaction of the user with the `ui` (e.g. a click on a button, adjustment of filters, etc.) is stored in `input` list.  This information is passed on to the `server` and can be used there. 
+   + `server` listens for changes in the `input` list/object
+ - `output`
+   + every object to be displayed in the app is stored in the `output` list in the `server` and passed on to `ui`. 
+   + `ui` listens for changes in the `output` list. 
+   
+In other words, outputs are created in the `server` and displayed in the `ui` and inputs emerge in `ui` and are used for calculations/adapting the code in `server`.
+
+## Outputs
+
+We'll first focus on outputs. As mentioned, outputs, can be for example graphs. Let's start by creating a regular ggplot graph: 
+
+
+## Creating a ggplot
+
+### Python
+
+```{python py-create-graph}
+diamonds_plot = (ggplot(data = diamonds)
+                        + aes(x = "carat",
+                              y = "price", 
+                              color = "color")
+                        + geom_point(size = 3, 
+                                    shape = "o",
+                                    alpha = 0.5
+                                    )
+                        + geom_smooth()                   
+                        )
+
+```
+
+
+### R
+
+```{r r-create-graph}
+diamonds_plot <- ggplot(data = diamonds) +
+  aes(x = carat,
+      y = price, 
+      color = color) +
+  geom_point(size = 3,
+             shape = 19,
+             alpha = 0.5
+             )
+  geom_smooth()
+
+```
+ 
+
+## Add server logic
+
+### Server side 
+
+#### Python  
+Let's now plug this graph in to the Shiny. Within the `server` function, you need to create the an output: 
+ 
+```{python py-create-output}
+
+def server(input, output, session):
+    @output
+    @render.plot
+    def diamonds_plot():
+      diamonds_plot = ( ggplot(data = diamonds)
+                        + aes(x = "carat",
+                              y = "price", 
+                              color = "color")
+                        + geom_point(size = 3, 
+                                    shape = "o",
+                                    alpha = 0.5
+                                    )
+                        + stat_smooth(method = "lm")                   
+                        )
+        return diamonds_plot
+
+``` 
+
+We have done a few things within the server: 
+ - defined a function `diamonds_plot`
+ - decorate it with `@output` to tag it as one of the outputs
+ - decorate it with `@render.plot` to define which type of output the function produces
+ 
+This way we pass the information from server there is an output called `diamonds_plot` to be displayed. 
+ 
+#### R  
+```{r r-create-output}
+#| eval: false
+
+server <- function(input, output){
+  
+  output$diamonds_plot <- renderPlot({
+       
+  ggplot(data = diamonds) +
+  aes(x = carat,
+      y = price, 
+      color = color) +
+  geom_point(size = 3,
+             shape = 19,
+             alpha = 0.5
+             )+
+      geom_smooth()                   
+
+    })
+    
+}
+
+```
+
+Notice that we generated a plot with a function `renderPlot({})` and assigned it to an element of the `output` list called `diamonds_plot`. This way we pass the information that there is an output called `diamonds_plot` to be displayed.
+ 
+
+But when we run the app now, we can see that nothing has changed. Do you know why??
+...
+
+### ui side
+
+It's because the output has not been passed to the `ui`. Let's fix it: 
+
+#### Python 
+
+```{python py-ui-output}
+app_ui = ui.page_fluid(
+    ui.output_plot("diamonds_plot"),
+)
+
+def server(input, output, session):
+    @output
+    @render.plot
+    def diamonds_plot():
+      diamonds_plot = ( ggplot(data = diamonds) 
+                  + aes(x = carat,
+                        y = price, 
+                        color = color) 
+                  + geom_point(size = 3,
+                               shape = 19,
+                               alpha = 0.5
+                               )
+                  + geom_smooth()
+                  )
+        return diamonds_plot
+
+```
+
+We used a `ui.output_plot` function together with it's ID (`"diamonds_plot"`) to display the output. The are number of `@render.*` decorators and `ui.output_*` functions that work together, each for a different generated object. 
+
+#### R 
+```{r r-ui-output}
+#| eval: false
+
+ui <- fluidPage(
+  plotOutput("diamonds_plot")
+)
+
+server <- function(input, output){
+  
+  output$diamonds_plot <- renderPlot({
+       
+     ggplot(data = diamonds) +
+  aes(x = carat,
+      y = price, 
+      color = color) +
+  geom_point(size = 3,
+             shape = 19,
+             alpha = 0.5
+             )
+    })
+    
+
+}
+```
+
+We used a `plotOutput()` function together with it's ID (`"diamonds_plot"`) to display the output. The are number of `render*` and `*Output` functions that work together, each for a different generated object. You can have a [cheatsheet here](https://shiny.posit.co/r/getstarted/build-an-app/images/cheatsheet-outputs.png) to find more examples.
+
+# Control widgets (aka filters)
+
+IT worked! But it's not very interactive. What we can do now to introduce interactivity is to use some control widgets (or filters?). Thanks to them user will be able to create `input` and control the graph. 
+
+In our graph, we opted for some point styling options. But maybe users would like to adapt it?
+
+Remember, inputs are created in UI, so the control widgets should be added there.
+
+## UI side
+
+## Python
+```{python py-add-inputs}
+
+app_ui = ui.page_fluid(
+    ui.input_slider("point_size", "Change size of the points:", 1, 10, 3),
+    
+    ui.output_plot("diamonds_plot"),
+)
+
+
+```
+
+### R 
+```{r r-add-inputs}
+#| eval: false
+
+
+ui <- fluidPage(
+  sliderInput("point_size", "Change size of the points:", 1, 10, 3),
+  
+  plotOutput("diamonds_plot")
+)
+
+
+```
+
+In this case we used `sliderInput()` (`ui.input_slider`) but there are number of possibilities - please have a look at the:
+
+* **R** : [control widgets gallery](https://shiny.posit.co/r/gallery/widgets/widget-gallery/?_gl=1*v8tpcr*_ga*NjU0NjYwMTIzLjE2ODQ3NjM3NjE.*_ga_2C0WZ1JHG0*MTY4NTEzMDQ3Ny40LjAuMTY4NTEzMDQ3Ny4wLjAuMA..) 
+* **Python** : [input controls documentation](https://shiny.posit.co/py/docs/inputs.html)
+
+The input has to has an ID (`"point_size"`), label (it will be displayed on top of the control), and in case of the slider, minimum, maximum and selected value. 
+
+The ID is particularly important, because it identifies the input and allows it to be used in the  `server`.
+
+## Server side 
+Once you add this and run the app, a nice slider will appear, but nothing happens when you move the arrow. Why?
+
+It's because that the information has not been passed to the server. Let's fix it!
+
+### Python 
+```{python py-input-server}
+
+def server(input, output, session):
+    @output
+    @render.plot
+    def diamonds_plot():
+      diamonds_plot = ( ggplot(data = diamonds) 
+                  + aes(x = carat,
+                        y = price, 
+                        color = color) 
+                  + geom_point(size = input.point_size(),
+                               shape = 19,
+                               alpha = 0.5
+                               )
+                  + geom_smooth()
+                  )
+        return diamonds_plot
+
+```
+
+
+### R 
+```{r r-input-server}
+#| eval: false
+
+server <- function(input, output){
+  
+  output$diamonds_plot <- renderPlot({
+       
+     ggplot(data = diamonds) +
+  aes(x = carat,
+      y = price, 
+      color = color) +
+  geom_point(size = input$point_size,
+             shape = 19,
+             alpha = 0.5
+             )
+    })
+  
+}
+
+```
+
+We've changed the hardcoded size value to a `input$point_size` (`input.point_size()`). We're using the input's ID that we provided in the UI. That's how we know which input is which. 
+
+#### Exercise? 
+
+1. Try out other types of control widgets to adapt `shape` and `alpha`.
+
+::: {.callout-info Hint}
+
+* **Python**: Consider `input_numeric()` , `input_text()`, `input_select()`
+* **Python**: [possible point shapes](https://f0nzie.github.io/rmarkdown-python-plotnine/plotnine_files/figure-html/shapes-1.png)
+
+* **R**: Consider `numericInput()`, `selectInput()`
+* **R**: [possible point shapes](http://www.sthda.com/sthda/RDoc/images/points-symbols.png)
+:::
+
+# Reactivity
+
+It's nice that we can adapt the visual appearance of the plot, but the great strength of shiny is in possibility of drilling into the data itself. If we want to do this, we need to create an *reactive object*. 
+
+Let's say that we want to be able to filter the dataset by quality of the cut (`cut` variable in `diamonds` dataset).
+
+## UI side
+
+### Python 
+
+```{python py-try-reactvity}
+
+app_ui = ui.page_fluid(
+    ui.input_slider("point_size", "Change size of the points:", 1, 10, 3),
+    ui.input_select("cut_filter", "Choose cut quality", 
+                    choices = diamonds.cut.unique().tolist() 
+                    ),
+    ui.output_plot("diamonds_plot"),
+)
+
+```
+
+
+### R 
+```{r r-try-reactivity}
+#| eval: false
+
+ui <- fluidPage(
+  sliderInput("point_size", "Change size of the points:", 1, 10, 3),
+  
+  selectInput("cut_filter", label = "Choose cut quality" , choices = levels(diamonds$cut) ),
+  
+  plotOutput("diamonds_plot")
+)
+```
+
+## Server side
+We added a control, but we need to make an adjustment from the server side: 
+
+### Python
+```{python py-use-reactive-cut}
+def server(input, output, session):
+  
+    @output
+    @render.plot
+    def diamonds_plot():
+      
+      cut_filter = input.cut_filter()
+      diamonds_new = diamonds.query("cut == @cut_filter")
+      
+      diamonds_plot = ( ggplot(data = diamonds_new) 
+                  + aes(x = carat,
+                        y = price, 
+                        color = color) 
+                  + geom_point(size = input.point_size(),
+                               shape = 19,
+                               alpha = 0.5
+                               )
+                  + geom_smooth()
+                  )
+        return diamonds_plot
+```
+
+### R 
+```{r r-use-reactive-cut}
+#| eval: false
+
+server <- function(input, output){
+  
+  output$diamonds_plot <- renderPlot({
+    diamonds_new <- diamonds %>%
+      filter(cut == input$cut_filter)
+    
+    ggplot(data = diamonds_new) +
+      aes(x = carat,
+          y = price, 
+          color = color) +
+      geom_point(size = input$point_size,
+                 shape = 19,
+                 alpha = 0.5
+      )
+  })
+}
+
+```
+So this worked. but let's imagine you want to use it for more plots. 
+We would need to move it outside from the `renderPlot({})`/ `diamonds_plot()` function context so it's visible for other plots too. Let's try: 
+
+### Python 
+```{python py-use-reactive-cut-fail}
+def server(input, output, session):
+    
+    cut_filter = input.cut_filter()
+    diamonds_new = diamonds.query("cut == @cut_filter")
+  
+    @output
+    @render.plot
+    def diamonds_plot():
+      
+      
+      diamonds_plot = ( ggplot(data = diamonds_new) 
+                  + aes(x = carat,
+                        y = price, 
+                        color = color) 
+                  + geom_point(size = input.point_size(),
+                               shape = 19,
+                               alpha = 0.5
+                               )
+                  + geom_smooth()
+                  )
+        return diamonds_plot
+```
+
+
+### R
+```{r r-use-reactive-cut-fail}
+#| eval: false
+
+server <- function(input, output){
+  
+  diamonds_new <- diamonds %>%
+    filter(cut == input$cut_filter)
+  
+  output$diamonds_plot <- renderPlot({
+    
+    ggplot(data = diamonds_new) +
+      aes(x = carat,
+          y = price, 
+          color = color) +
+      geom_point(size = input$point_size,
+                 shape = 19,
+                 alpha = 0.5
+      )
+  })
+}
+
+```
+
+
+And now let's create another object, e.g. a table.
+
+### Python
+```{python py-add-table}
+
+    @output
+    @render.table
+    def diamonds_table():
+      return diamonds_new.sort_values("price").head()
+      
+
+
+```
+
+
+### R
+```{r r-add-table}
+
+output$diamonds_table <- renderTable({
+  diamonds_new %>%
+    arrange(price) %>%
+    head(10)
+})
+
+```
+
+We will also need to add it to the  `ui` so that we can see it:
+
+### Python
+```{python  py-add-table-to-ui}
+#| eval: false 
+  ui.output_table("diamonds_table")
+
+```
+
+### R
+```{r  r-add-table-to-ui}
+#| eval: false 
+  tableOutput("diamonds_table")
+
+```
+
+Try running app now. What happened?
+
+It's because we tried to apply an interactive change to a static dataset. Previously it worked, because we did it within the reactive environment ( `renderPlot({})`  or `@render.plot`). This environment is reactive by default. If we were to use this method for each plot, the Shiny App would become very slow, as we would need to create a new dataset for each output. 
+
+## Reactive objects 
+
+Luckily, we can make the dataset itself (or any other object) reactive too, using `reactive` function. 
+
+### Python 
+
+```{python py-reactive-object}
+
+    @reactive.Calc
+    def diamonds_new():
+        cut_filter = input.cut_filter()
+        diamonds_new = diamonds.query("cut == @cut_filter")
+        return diamonds_new
+  
+```
+
+
+### R
+```{r r-reactive-object}
+
+  diamonds_new <- reactive({diamonds %>%
+      filter(cut == input$cut_filter)
+    })
+```
+
+Now we still need to adapt one thing in our code. Namely, the `reactive` objects (so also `diamonds_new`),are functions, so they need to be called with brackets `diamonds_new()`.
+
+### Python
+
+```{python py-update-outputs-reactive}
+
+     return diamonds_new().sort_values("price").head()
+   
+   #(....)
+   
+     diamonds_plot = (ggplot(data = diamonds_new())
+
+
+```
+
+
+### R 
+```{r r-update-outputs-reactive}
+
+    ggplot(data = diamonds_new()) 
+
+#(...)
+
+renderTable({
+  diamonds_new() %>%
+    arrange(price) %>%
+    head(10)
+})
+
+
+```
+
+Now you can add to the shiny other objects, that will all react to the same control widget. 
+
+# Interactive plots (`plotly`)
+It would be nice to have the plot a bit more interactive. A widely used library to do that is `plotly`. 
+
+### Python
+
+```{python py-plotly library}
+from shinywidgets import output_widget, render_widget
+import plotly.express as px
+
+```
+
+
+### R
+In R, there is a nice wrapper function for static `ggplot` object to convert them to an `plotly` graph, namely `ggplotly()`. 
+
+For this we will need to (install) and load `plotly` library: 
+
+```{r r-plotly library}
+#install.packages("plotly")
+
+library(plotly)
+```
+
+### Python 
+
+```{python r-create-plotly}
+
+    @output
+    @render_widget
+    def diamonds_plotly():
+        fig = px.scatter(diamonds_new(), 
+                         x = "carat",
+                         y = "price",
+                         color = "color")
+        fig.update_traces(marker_size = input.point_size(),
+                          marker_opacity = 0.5,
+                          marker_symbol = 'diamond')
+
+```
+
+
+### R 
+```{r r-adapt-plotly}
+#| eval: false 
+
+ output$diamonds_plot <- renderPlotly({
+    
+    p <- ggplot(data = diamonds_new()) +
+      aes(x = carat,
+          y = price, 
+          color = color) +
+      geom_point(size = input$point_size,
+                 shape = 19,
+                 alpha = 0.5
+      )
+    
+    ggplotly(p)
+   
+  })
+```
+
+
+Here, we needed to slightly adapt the rendering function, because the type of the object we render has changed so we changed `renderPlot({})` to `renderPlotly({})`. 
+
+We would have to have to make a corresponding change in the `ui` too. Can anybody guess what will it be? 
+
+### Plotly 
+
+```{python py-add-plotlyoutput}
+
+  output_widget("diamonds_plotly")
+
+
+```
+
+
+### R 
+```{r r-add-plotlyoutput}
+#| eval: false
+
+  plotlyOutput("diamonds_plot")
+
+```
+
+Like that you can include some more information about your points/ diamonds that were not visible in a static version of the graph. 
+
+```{r}
+#| eval: false 
+
+ output$diamonds_plot <- renderPlotly({
+    
+    p <- ggplot(data = diamonds_new()) +
+      aes(x = carat,
+          y = price, 
+          color = color, 
+          cut = cut,
+          clarity = clarity, 
+          table = table
+          ) +
+      geom_point(size = input$point_size,
+                 shape = 19,
+                 alpha = 0.5
+      )
+    
+    ggplotly(p)
+   
+  })
+```
+
+# UI layout
+
+## Exercise 
+
+Let's add some simple UI layout.
+
+::: {.callout-info Hint}
+
+* **Python** [use common structure](https://shiny.posit.co/py/docs/ui-page-layouts.html#common-structure)
+
+* **R** [use page with sidebar](https://mastering-shiny.org/action-layout.html#page-with-sidebar)
+
+:::
+
+
+## Python 
+
+https://shiny.posit.co/py/docs/ui-page-layouts.html
+
+
+## R 
+We won't have time to talk about layout, but here's an [article on how to organize your app the way you want](https://shiny.posit.co/r/articles/build/layout-guide/). You can have a sidebar menu, tabsets and many more. 
+
+# Publishing your app
+
+## Python 
+
+[Deployment in Python](https://shiny.posit.co/py/docs/deploy.html)
+
+
+## R 
+[ShinyApps.io](https://www.shinyapps.io/) is a web service that will let you share your shiny apps. You sign up for an account, then you can publish your Shiny apps for free. The free account level has a limited number of apps (10), and a limited number of hours of usage per month, but this will often do for simple models without a lot of usage. You can update your account from the free tier to accommodate more usage per month if it is popular. There are a number of tiers (Starter, Basic, Standard, and Professional) at different price points and usage volumes. Each app gets a unique web URL, which you can share with others, in the format: https://username.shinyapps.io/webapp_name/
+
+After creating a free account at https://www.shinyapps.io/, to link your account with your RStudio application,
+
+* In RStudio, open the Tools menu and select Global Options.
+* Click on the Publishing tab on the left.
+* Click on Connect on the right.
+* Select shinyapps.io.
+* Follow the instructions to input your token.
+
+To publish from RStudio:
+
+* Open the app.R file in RStudio.
+* Click on the Publish icon (blue circle) in the top-right of the Source pane, or the arrow next to it.
+* Select files to be published: your app.R file and any other data files or images.
+* Select your account.
+* Provide a title for your app.
+* Click Publish.
+
+# Important topics (that we don't have time for)
+
+* Handling events
+  + `@reactive.event()`/ `bindEvent()`
+  + `isolate()`
+  + progress bars
+  
+
+# Shinylive
+
+# Testing 
+
+# References
+
+Some excellent resources for learning more about Shiny web apps, dashboards, etc. can be found at:
+
+Lots of introductory material can be found at the [RStudio Tutorial Webpage](https://shiny.posit.co/r/getstarted/shiny-basics/lesson1/index.html) with 32 video lessons in 3 parts. Follow the link to get started.
+
+[How to Build a Shiny App from Scratch](https://bookdown.org/hadrien/how_to_build_a_shiny_app_from_scratch/) is a nice free e-book, and a more complete introduction to building Shiny apps.
+
+The [Mastering Shiny](https://mastering-shiny.org/) e-book takes you further under the hood, explaining how Shiny works, with excellent explanations of reactivity and more advanced Shiny programming.
+
+Check out this step by [step guide to publishing a Shiny app](https://statsandr.com/blog/how-to-publish-shiny-app-example-with-shinyapps-io/) on shinyapps.io 

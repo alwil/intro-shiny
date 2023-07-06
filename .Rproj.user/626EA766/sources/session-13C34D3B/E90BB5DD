@@ -1,0 +1,27 @@
+{
+    "id": "E90BB5DD",
+    "path": "~/Desktop/R Cafe/Workshops/Coding-Sessions/intro_shiny/RCafe_shiny_notes.qmd",
+    "project_path": "RCafe_shiny_notes.qmd",
+    "type": "quarto_markdown",
+    "hash": "2634641731",
+    "contents": "",
+    "dirty": false,
+    "created": 1688628008674.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "121,0",
+        "scrollLine": "115",
+        "last_setup_crc32": "13C34D3B7eb81bfc"
+    },
+    "folds": "82|3|85|0|\n92|23|98|0|\n170|20|175|0|\n179|17|184|0|\n",
+    "lastKnownWriteTime": 1688680561,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1688680561179,
+    "read_only": false,
+    "read_only_alternatives": []
+}
