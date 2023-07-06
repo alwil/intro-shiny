@@ -1,1 +1,1 @@
-# intro-shiny
+# Introduction to Shiny - coding session
